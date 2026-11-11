@@ -1,0 +1,2667 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doğan'ıma ♪♡</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 4 Aşamalı Dikey Renk Geçişi: 
+   Koyu Yeşil -> #B4D39B Pastel Yeşil -> #8FAEC9 Pastel Mavi -> Koyu Gece Mavisi */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg, 
+    #132419 0%,    /* Koyu Orman Yeşili */
+    #b4d39b 32%,   /* #B4D39B Pastel Yeşil */
+    #8faec9 68%,   /* #8FAEC9 Pastel Mavi */
+    #0d1721 100%   /* Koyu Gece Mavisi */
+  );
+  background-attachment: fixed; /* Aşağı kaydırdıkça renkler ekranda pürüzsüz akar */
+  color: #1a251e;
+  font-family: Georgia, 'Times New Roman', serif;
+  padding: 42px 18px 60px;
+}
+
+.wrap {
+  max-width: 560px;
+  margin: auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+h1 {
+  font-size: 38px;
+  font-weight: 400;
+  margin: 0 0 8px;
+  letter-spacing: .5px;
+  color: #f2f7f4;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Alt Başlık */
+.sub {
+  color: #d2e4cb;
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Sayaç Kutusu - Cam efektli */
+.timer-info {
+  text-align: center;
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #16291d;
+  margin: 15px 0 25px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  padding: 12px 16px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Şarkı Kartları - Arka planı hissettiren soft cam kartlar */
+.song {
+  position: relative;
+  width: 100%;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  color: #14211a;
+  border-radius: 18px;
+  padding: 18px;
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transition: all .25s ease;
+}
+
+.song:not(.locked):hover {
+  transform: translateY(-2px);
+  background: #ffffff;
+  border-color: #8faec9;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+/* Şarkı Numarası Dairesi (#B4D39B yeşili zemin) */
+.number {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #b4d39b;
+  color: #172d1f;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid #8faec9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.song-details,
+.song-info {
+  flex: 1;
+}
+
+strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #132119;
+}
+
+small {
+  display: block;
+  color: #4a6354;
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin-top: 4px;
+}
+
+.arrow {
+  margin-left: auto;
+  font: 24px Arial;
+  color: #557b9c;
+}
+
+/* Açılan Not Kutusu */
+.note {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 5;
+  background: #ffffff;
+  color: #17241d;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  border: 1.5px solid #8faec9;
+  border-top: 3px solid #b4d39b;
+}
+
+.song.open {
+  margin-bottom: 125px;
+}
+
+.song.open .note {
+  display: block;
+}
+
+.note p {
+  font-size: 17px;
+  line-height: 1.55;
+  margin: 0 0 16px;
+  font-style: italic;
+  color: #1b2e24;
+}
+
+.note a {
+  display: inline-block;
+  background: #1db954;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.25);
+  transition: transform .2s ease;
+}
+
+.note a:hover {
+  transform: scale(1.03);
+}
+
+/* Kilitli Şarkı Tasarımı */
+.song.locked {
+  background: rgba(240, 245, 248, 0.58);
+  border: 1.5px dashed rgba(143, 174, 201, 0.85);
+  opacity: 0.82;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.song.locked .number {
+  background: #cadde7;
+  color: #5a7587;
+  border-color: rgba(143, 174, 201, 0.5);
+  box-shadow: none;
+}
+
+.song.locked .real-content {
+  display: none !important;
+}
+
+.song.locked .secret-title {
+  display: block !important;
+  color: #486e8c;
+  font-style: italic;
+}
+
+.song:not(.locked) .secret-title {
+  display: none !important;
+}
+
+.song:not(.locked) .real-content {
+  display: block !important;
+}
+
+.song.locked .arrow {
+  font-size: 16px;
+  color: #587f9f;
+}
+
+.footer {
+  text-align: center;
+  color: #c4d9e9;
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin-top: 36px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+  /* Kare Çevirmeli Sayaç Stilleri */
+.bday-countdown-wrap {
+  text-align: center;
+  margin: 0 auto 28px;
+  max-width: 420px;
+}
+
+.bday-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+
+.flip-clock {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.flip-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flip-card {
+  position: relative;
+  width: 62px;
+  height: 60px;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f7f3 48%, #e2ede5 52%, #d7e7dc 100%);
+  color: #14281c;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1.5px solid #8faec9;
+  box-shadow: 0 6px 16px rgba(20, 36, 26, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+}
+
+/* Kartın ortasındaki retro kesik çizgisi */
+.flip-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(143, 174, 201, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.flip-unit span {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #274534;
+  margin-top: 6px;
+}
+  /* Tek Tıkla Açılan Polaroid Kart Stili */
+.song.show-card {
+  margin-bottom: 340px; /* Kart açıldığında alttaki şarkıları zarifçe aşağı iter */
+}
+
+.polaroid-step {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.5deg);
+  top: calc(100% + 12px);
+  z-index: 10;
+  width: 250px;
+  background: #ffffff;
+  padding: 12px 12px 16px;
+  border-radius: 6px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28);
+  border: 1.5px solid #8faec9;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.song.show-card .polaroid-step {
+  display: block;
+}
+
+.polaroid-img-box {
+  width: 100%;
+  height: 200px;
+  background: #eef3f0;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.polaroid-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Polaroid'in altındaki senin özel notun */
+.polaroid-caption {
+  margin: 12px 0 10px;
+  font-family: Georgia, serif;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #24352b;
+  font-style: italic;
+  word-break: break-word;
+}
+
+/* Polaroid içindeki Spotify butonu */
+.polaroid-spotify {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #1DB954;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(29, 185, 84, 0.08);
+  transition: background 0.2s;
+}
+
+.polaroid-spotify:hover {
+  background: rgba(29, 185, 84, 0.16);
+}
+
+/* Eski düz not kutusunu gizle (artık polaroid içinde görünüyor) */
+.song .note {
+  display: none !important;
+}
+    /* Doğum Günü Final Alanı & Spotify Çalma Listesi */
+    .bday-final-box {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 25px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1.5px solid #ffffff;
+      border-radius: 20px;
+      text-align: center;
+      animation: popIn 0.5s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .bday-final-box h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .bday-final-box p {
+      font-size: 13.5px;
+      margin-bottom: 15px;
+      opacity: 0.95;
+    }
+
+    .full-spotify-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1DB954;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+      transition: transform 0.2s;
+    }
+
+    .full-spotify-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Yüzen Dijital Kamera İkonu */
+    .cam-float-btn {
+      display: none; /* Doğum gününde JS ile 'flex' yapılacak */
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, #8faec9, #b4d39b);
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+      cursor: pointer;
+      z-index: 1000;
+      animation: floatCam 2s infinite ease-in-out;
+    }
+
+    @keyframes floatCam {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Dijital Kamera Galeri Modal Penceresi */
+    .cam-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 15, 25, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* Dijital Kamera Gövdesi Tasarımı */
+    .cam-body {
+      position: relative;
+      background: #2b3035;
+      border: 4px solid #4a525d;
+      border-radius: 24px;
+      padding: 20px 16px 24px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.2);
+      text-align: center;
+    }
+
+    /* Vizör / Deklanşör Süsleri */
+    .cam-lens-ring {
+      position: absolute;
+      top: -12px;
+      left: 30px;
+      width: 38px;
+      height: 10px;
+      background: #1c1f22;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .cam-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: #ff5c5c;
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 28px;
+    }
+
+    /* Dijital LCD Ekran */
+    .cam-screen {
+      background: #000000;
+      border: 3px solid #16181a;
+      border-radius: 12px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      margin-top: 15px;
+      margin-bottom: 16px;
+    }
+
+    .cam-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .cam-counter {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #79f79d;
+      font-family: monospace;
+      font-size: 13px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      letter-spacing: 1px;
+    }
+
+    /* Kamera Tuş Takımı */
+    .cam-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .cam-btn {
+      background: #3f4752;
+      border: 1px solid #5a6575;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #242930;
+      transition: all 0.1s;
+    }
+
+    .cam-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #242930;
+    }
+
+    .cam-label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: #aab5c2;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+  /* Hediye Kutusu Butonu */
+    .gift-wrap-container {
+      width: 100%;
+      max-width: 480px;
+      margin: 15px auto 25px;
+      text-align: center;
+    }
+
+    .gift-box-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px dashed rgba(255, 255, 255, 0.5);
+      border-radius: 18px;
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+      color: #fff;
+    }
+
+    .gift-box-card.locked {
+      opacity: 0.75;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .gift-box-card.unlocked {
+      background: linear-gradient(135deg, rgba(255, 223, 137, 0.28), rgba(255, 142, 142, 0.25));
+      border: 2px solid #ffeaa7;
+      animation: giftPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes giftPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 234, 167, 0.3); }
+      50% { transform: scale(1.02); box-shadow: 0 8px 25px rgba(255, 234, 167, 0.5); }
+    }
+
+    .gift-icon {
+      font-size: 30px;
+    }
+
+    .gift-text strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .gift-text small {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+
+    /* Video Polaroid Modal Penceresi */
+    .video-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(12, 16, 24, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* Polaroid Video Kartı */
+    .polaroid-video-card {
+      background: #ffffff;
+      padding: 16px 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      position: relative;
+      transform: rotate(-1.5deg);
+      animation: popIn 0.4s ease forwards;
+    }
+
+    .polaroid-video-screen {
+      width: 100%;
+      height: 380px;
+      background: #000;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .polaroid-video-screen video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .polaroid-video-caption {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #333333;
+      font-family: 'Caveat', cursive, sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    .video-close-btn {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      background: #ff5c5c;
+      color: #fff;
+      border: 2px solid #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 10;
+    }
+  /* Konfeti ve Sarı Yıldız Parçacıkları */
+.confetti-particle {
+  position: fixed;
+  top: -20px;
+  z-index: 99999;
+  pointer-events: none;
+  user-select: none;
+  animation: fallConfetti linear forwards;
+}
+
+@keyframes fallConfetti {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(0.8);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+
+</style>
+  
+</head>
+<body>
+<div class="wrap">
+  <header>
+      <!-- Doğum Günü Geri Sayım Sayacı (3 Mart 2027) -->
+  <div class="bday-countdown-wrap">
+    <div class="bday-title">doğum gününe kalan süre ⌛︎</div>
+    <div class="flip-clock">
+      <div class="flip-unit">
+        <div class="flip-card" id="bday-days">00</div>
+        <span>GÜN</span>
+      </div>
+      <div class="flip-unit">
+        <div class="flip-card" id="bday-hours">00</div>
+        <span>SAAT</span>
+      </div>
+      <div class="flip-unit">
+        <div class="flip-card" id="bday-mins">00</div>
+        <span>DAKİKA</span>
+      </div>
+      <div class="flip-unit">
+        <div class="flip-card" id="bday-secs">00</div>
+        <span>SANİYE</span>
+      </div>
+    </div>
+  </div>
+
+    <h1>Doğan'ıma ♪♡</h1>
+    <div class="sub">her gün için bir şarkı</div>
+  </header>
+
+  <div id="unlock-timer" class="timer-info"></div>
+    <!-- Doğum Gününde Açılacak Tüm Playlist Kutusu -->
+  <div class="bday-final-box" id="bday-final-box">
+    <h2>Tüm Şarkılar Senin İçin Hazır! 🎂</h2>
+    <p>Senin için seçtiğim 112 şarkının tamamı bu Playlist'te 𑣲𝄞 </p>
+    <!-- Buradaki linke kendi Spotify çalma listesi bağlantını yapıştırabilirsin: -->
+        <a class="full-spotify-btn" href="https://open.spotify.com/playlist/20KOdw6U9rLsRpiqTQTn3a?si=f5NAIMZgT8aB-vSWYoWH1g" target="_blank" rel="noopener">♫ Tüm Çalma Listesini Spotify'da Dinle</a>
+
+  </div>
+  <!-- Hediye Kutusu -->
+  <div class="gift-wrap-container">
+    <div class="gift-box-card locked" id="gift-box" onclick="handleGiftClick()">
+      <span class="gift-icon">🎁</span>
+      <div class="gift-text">
+        <strong id="gift-title">Sürpriz Bir Hediye Kutusu 🔒</strong>
+        <small id="gift-subtitle">Doğum günün geldiğinde açılacak...</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Polaroid Pop-up Penceresi -->
+  <div class="video-modal" id="video-modal" onclick="closeVideoModal()">
+    <div class="polaroid-video-card" onclick="(event || window.event).stopPropagation()">
+      <button class="video-close-btn" onclick="closeVideoModal()">✕</button>
+      <div class="polaroid-video-screen">
+        <video id="birthday-video" controls playsinline preload="metadata">
+          <source src="https://raw.githubusercontent.com/ehilal4188/Dgdg/main/video.mp4" type="video/mp4">
+          Tarayıcın video etiketini desteklemiyor.
+        </video>
+      </div>
+      <div class="polaroid-video-caption">˙✧˖°📷 ⋆｡˚♡</div>
+    </div>
+  </div>
+
+  <!-- Yüzen Dijital Kamera Butonu -->
+  <div class="cam-float-btn" id="cam-float-btn" onclick="openGallery()" title="Fotoğraf Galerisi">
+    📷
+  </div>
+
+  <!-- Dijital Fotoğraf Makinesi Penceresi -->
+  <div class="cam-modal" id="cam-modal">
+    <div class="cam-body">
+      <div class="cam-lens-ring"></div>
+      <button class="cam-close-btn" onclick="closeGallery()">✕</button>
+      
+      <div class="cam-screen">
+        <img id="gallery-photo" src="" alt="Anı">
+        <div class="cam-counter" id="gallery-counter">01 / 112</div>
+      </div>
+
+      <div class="cam-controls">
+        <button class="cam-btn" onclick="prevPhoto()">◀ Geri</button>
+        <span class="cam-label">her evrende arkadaşım olman dileğiyle</span>
+        <button class="cam-btn" onclick="nextPhoto()">İleri ▶</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 1. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">1</span>
+    <span class="song-info">
+      <strong>Derdimin Çiçeği</strong>
+      <small>Kalben</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“bak, hayattayım, hala yanındayım, hep seninleyim”</p>
+      <a href="https://open.spotify.com/track/0sULDifDFLkH5zAo3L5iFi?si=Z67VNHe8Q4uvMIWAp2Hz9g&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+  <!-- 2. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">2</span>
+    <span class="song-info">
+      <strong>You Get Me So High</strong>
+      <small>The Neighbourhood</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you're my best friend and I love you forever”</p>
+      <a href="https://open.spotify.com/search/The%20Neighbourhood%20You%20Get%20Me%20So%20High" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+  <!-- 3. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">3</span>
+    <span class="song-info">
+      <strong>Divane</strong>
+      <small>Yaşar</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yokluğunda cehennem gibidir”</p>
+      <a href="https://open.spotify.com/track/3V9Cf4pENsRh02WTMJ726n?si=hOIYRarNSLaYm3zhuzHamA&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+  <!-- 4. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">4</span>
+    <span class="song-info">
+      <strong>Dibine Kadar</strong>
+      <small>Duman</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ama o beni anladı”</p>
+      <a href="https://open.spotify.com/search/Duman%20Dibine%20Kadar" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 5. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">5</span>
+    <span class="song-info">
+      <strong>We Are the People</strong>
+      <small>Empire Of the Sun</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“I know everything about you, you know everything about me”</p>
+      <a href="https://open.spotify.com/search/Empire%20of%20the%20Sun%20We%20Are%20the%20People" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 6. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">6</span>
+    <span class="song-info">
+      <strong>Love Me Not</strong>
+      <small>Ravyn Lenae</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ıt's hard to see you but I wish you were right here”</p>
+      <a href="https://open.spotify.com/track/1UNEuG9DYOWiikf00ayr52" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 7. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">7</span>
+    <span class="song-info">
+      <strong>Kediler ve Şarkılar</strong>
+      <small>Yaşlı Amca</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“her şeyi sana benzetirdim ama hiç kimse benzemezdi sana”</p>
+      <a href="https://open.spotify.com/track/47lxhJgKvSxWOLD4WzHaUu" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 8. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">8</span>
+    <span class="song-info">
+      <strong>Dünyanın En Güzel Kızı</strong>
+      <small>Mavi Gri</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“göremezsem o güzel yüzünü ölücem”</p>
+      <a href="https://open.spotify.com/track/3naYqiHrwFLitIKYHHJgvo" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 9. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">9</span>
+    <span class="song-info">
+      <strong>If We Have Each Other</strong>
+      <small>Alec Benjamin</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you should know I'll be there for you”</p>
+      <a href="https://open.spotify.com/search/Alec%20Benjamin%20If%20We%20Have%20Each%20Other" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 10. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">10</span>
+    <span class="song-info">
+      <strong>Always Forever</strong>
+      <small>Cults</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you and me,always forever”</p>
+      <a href="https://open.spotify.com/track/2enPRFda84VE2wtI8c86Uf" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 11. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">11</span>
+    <span class="song-info">
+      <strong>Reflections</strong>
+      <small>The Neighbourhood</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“I never knew somebody like you”</p>
+      <a href="https://open.spotify.com/track/2xql0pid3EUwW38AsywxhV" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 12. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">12</span>
+    <span class="song-info">
+      <strong>Bal</strong>
+      <small>Duman</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“artık sen benim canımsın,canlı kalan tek yanımsın”</p>
+      <a href="https://open.spotify.com/track/7x76RN4ZCsw5DxT8LOmexq" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 13. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">13</span>
+    <span class="song-info">
+      <strong>Best Friend</strong>
+      <small>Conan Gray</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“that's my best friend, that's my right hand”</p>
+      <a href="https://open.spotify.com/track/6VZXTCIXbgypt0erc2U1Uk" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 14. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">14</span>
+    <span class="song-info">
+      <strong>Never Forget You</strong>
+      <small>Zara Larsson</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“from the day I met you,I knew that I'd love you 'til the day I die”</p>
+      <a href="https://open.spotify.com/track/6hmhG1b4LEyNuashVvuIAo" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 15. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">15</span>
+    <span class="song-info">
+      <strong>Birds Of A Feather</strong>
+      <small>Billie Eilish</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“I dont think I could love you more”</p>
+      <a href="https://open.spotify.com/track/6dOtVTDdiauQNBQEDOtlAB" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 16. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">16</span>
+    <span class="song-info">
+      <strong>Her şey Sensin</strong>
+      <small>Yalın</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“anladım,her şey sensin”</p>
+      <a href="https://open.spotify.com/track/406NzjjqZlOiFyIvhTGcAQ" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 17. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">17</span>
+    <span class="song-info">
+      <strong>Her Şey Seninle Güzel</strong>
+      <small>Eda Baba</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“seninle paylaştığım tek bir gün yeter bana”</p>
+      <a href="https://open.spotify.com/track/1eQhHMQyp97iDwpxWiqCYX?si=T7LJMbqlRa6ZpMdZO2Qbdg&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 18. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">18</span>
+    <span class="song-info">
+      <strong>Sen Varsın Diye</strong>
+      <small>Yüzyüzeyken Konuşuruz</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“gel, saklanacak bir yer bulalım ikimiz bir. Sen benim sırdaşım ol"</p>
+      <a href="https://open.spotify.com/track/3b8UW227uLkRDvd0w9e1Sw?si=bceYXM64TimMMR6qrvEM5A&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 19. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">19</span>
+    <span class="song-info">
+      <strong>Bilir O beni</strong>
+      <small>Pinhani</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“bugün aramadım ama bilir o beni”</p>
+      <a href="https://open.spotify.com/track/0szRcHR9IsUO2Xj8uAKPM6?si=em-9rH_TToKueqHJSzzZ9Q&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 20. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">20</span>
+    <span class="song-info">
+      <strong>Ne Yapardım</strong>
+      <small>Gökçe</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“seni bir gün görmesem, sesini bile duymasam ne yapardım bilmem”</p>
+      <a href="https://open.spotify.com/track/7c3T0Y1wXvkmcvDTH4aKO6?si=bsBOXQNCTH2guzBTzvXXbw&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 21. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">21</span>
+    <span class="song-info">
+      <strong>Something About You</strong>
+      <small>Eyedress</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“she looks just like a dream, the prettiest girl I've ever seen”</p>
+      <a href="https://open.spotify.com/track/3oNQ6NkihVzQkV5qhk2Pbe?si=gKJymTQBTUWljuuUay-yjA&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 22. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">22</span>
+    <span class="song-info">
+      <strong>Umbrella</strong>
+      <small>Rihanna</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“when the sun shine, we shine together”</p>
+      <a href="https://open.spotify.com/track/49FYlytm3dAAraYgpoJZux?si=2U4GzQGvRcq7H4VC-BmSgw&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 23. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">23</span>
+    <span class="song-info">
+      <strong>Bırakma Kendini</strong>
+      <small>Kaan Boşnak</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yanımda değilsen ne İstanbul ne Ankara"”</p>
+      <a href="https://open.spotify.com/track/3TU3nnAOCOKKqSTO016ImR?si=Z1ybjeHsT7axSJwNx8N61w&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 24. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">24</span>
+    <span class="song-info">
+      <strong>Ben Varım</strong>
+      <small>Ayten Alpman</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“eskiden korkardım yalnızlıktan, korkmam artık sen varsın”</p>
+      <a href="https://open.spotify.com/track/4JKFab0j6szsmQFB5qQzx0?si=nwtyG1RcRO20w9_jOzNm1Q&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 25. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">25</span>
+    <span class="song-info">
+      <strong>Benden Sana</strong>
+      <small>Nil Karaibrahimgil</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ama hep sen kazanacaksın”</p>
+      <a href="https://open.spotify.com/track/5G8EeDWPSoLYl5ba9yE0aP?si=aK5s7e6KQq2EjLHU1jX_9w&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 26. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">26</span>
+    <span class="song-info">
+      <strong>Papatya</strong>
+      <small>Teoman</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“bizi tanıyan herkes bilir senle beni eskiden beri”</p>
+      <a href="https://open.spotify.com/search/Teoman%20Papatya" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 27. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">27</span>
+    <span class="song-info">
+      <strong>Ben Anlarım</strong>
+      <small>Multitap</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ben anlarım çünkü en iyi ben tanırım seni”</p>
+      <a href="https://open.spotify.com/search/Multitap%20Ben%20Anlarım" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 28. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">28</span>
+    <span class="song-info">
+      <strong>Die First</strong>
+      <small>Nessa Barrett</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“but if one of us dies, I hope I die first. 'cause I dont wanna live without you”</p>
+      <a href="https://open.spotify.com/search/Nessa%20Barrett%20Die%20First" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 29. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">29</span>
+    <span class="song-info">
+      <strong>Küçücüğüm</strong>
+      <small>Yalın</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“niye bilmiyorum ama ben sadece senle mutluyum”</p>
+      <a href="https://open.spotify.com/search/Yalın%20Küçücüğüm" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 30. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">30</span>
+    <span class="song-info">
+      <strong>Tek It</strong>
+      <small>Cafuné</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“we were talking the same language”</p>
+      <a href="https://open.spotify.com/search/Cafuné%20Tek%20It" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 31. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">31</span>
+    <span class="song-info">
+      <strong>Senden Daha Güzel</strong>
+      <small>Duman</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“kimseyi tanımadım ben senden daha güzel”</p>
+      <a href="https://open.spotify.com/search/Duman%20Senden%20Daha%20Güzel" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 32. GÜN -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">32</span>
+    <span class="song-info">
+      <strong>Dinle Beni Bi'</strong>
+      <small>Yüzyüzeyken Konuşuruz</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“sen yokken ne gece ne gündüz, ne ay var be tek bi' yıldız”</p>
+      <a href="https://open.spotify.com/search/Yüzyüzeyken%20Konuşuruz%20Dinle%20Beni%20Bi" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+    <!-- 33. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">33</span>
+    <span class="song-info">
+      <strong>Hileli</strong>
+      <small>Manifest</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“senden kaçamadım, iyi ki bırakmadın peşimi”</p>
+      <a href="https://open.spotify.com/search/Manifest%20Hileli" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 34. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">34</span>
+    <span class="song-info">
+      <strong>Alone, Pt. II</strong>
+      <small>Alan Walker</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“and I'll be the one you rely on, a shoulder to cry on. A friend through the highs and the lows”</p>
+      <a href="https://open.spotify.com/search/Alan%20Walker%20Alone%20Pt%20II" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 35. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">35</span>
+    <span class="song-info">
+      <strong>Die With A Smile</strong>
+      <small>Lady Gaga, Bruno Mars</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“if the world was ending, I'd wanna be next to you”</p>
+      <a href="https://open.spotify.com/search/Bruno%20Mars%20Die%20With%20A%20Smile" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 36. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">36</span>
+    <span class="song-info">
+      <strong>Başrol Sensin</strong>
+      <small>Manifest</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“tam kaybetmişken,sizi buldum çıktık dipten. Omzuma yüklenmişken hayat üzmedi ilk defa”</p>
+      <a href="https://open.spotify.com/search/Manifest%20Başrol%20Sensin" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 37. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">37</span>
+    <span class="song-info">
+      <strong>Hero Too</strong>
+      <small>Kyoka Jiro</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“now it's my turn to be the one to make you smile”</p>
+      <a href="https://open.spotify.com/search/Kyoka%20Jiro%20Hero%20Too" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 38. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">38</span>
+    <span class="song-info">
+      <strong>Cümlelerim</strong>
+      <small>TUANA</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“insan öyle boş bir eve ait hisseder mi”</p>
+      <a href="https://open.spotify.com/search/TUANA%20Cümlelerim" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 39. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">39</span>
+    <span class="song-info">
+      <strong>505</strong>
+      <small>Arctic Monkeys</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“but I crumble completely when you cry”</p>
+      <a href="https://open.spotify.com/search/Arctic%20Monkeys%20505" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+
+  <!-- 40. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">40</span>
+    <span class="song-info">
+      <strong>We Fell in Love in October</strong>
+      <small>girl in red</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you will be my girl”</p>
+      <a href="https://open.spotify.com/search/girl%20in%20red%20we%20fell%20in%20love%20in%20october" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 41. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">41</span>
+    <span class="song-info">
+      <strong>Sen Olurdun Yine</strong>
+      <small>Ajda Pekkan</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“bir gün kaybolsam da umutsuz kalsam da, yol gösteren bana sen olurdun yine”</p>
+      <a href="https://open.spotify.com/search/Ajda%20Pekkan%20Sen%20Olurdun%20Yine" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 42. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">42</span>
+    <span class="song-info">
+      <strong>Dünyanın En Güzel</strong>
+      <small>Pinhani</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“herkes yanlış yapar, sen de yaparsın. Dünyanın en büyük armağanısın”</p>
+      <a href="https://open.spotify.com/track/6WqPehkBgI9AOXWaBog9jW?si=zXAetcxHSw-O7NH7K5LFJA&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 43. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">43</span>
+    <span class="song-info">
+      <strong>Can Dostum</strong>
+      <small>Emir Can İğrek</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ama bu yol ya öyle ya böyle, yürünecek seninle”</p>
+      <a href="https://open.spotify.com/track/6tHhAUAMwUwlEGpAVq1jlX?si=L_YRsBUUQKaDQ5NZzwpdqA&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 44. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">44</span>
+    <span class="song-info">
+      <strong>Mind Over Matter</strong>
+      <small>Young the Giant</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“and when the seasons change, will you stand by me”</p>
+      <a href="https://open.spotify.com/track/77KnJc8o5G1eKVwX5ywMeZ?si=Cr1IacjbSkuUFbLCXTsufg&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 45. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">45</span>
+    <span class="song-info">
+      <strong>Revenge</strong>
+      <small>Xxxtantacion</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“I've dug two graves for us,my dear”</p>
+      <a href="https://open.spotify.com/track/5TXDeTFVRVY7Cvt0Dw4vWW?si=b32yecWaQD-deH1IQf583Q&utm_source=copy-link">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+<!-- 46. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">46</span>
+    <span class="song-info">
+      <strong>Biraz Delisin</strong>
+      <small>Dolu Kadehi Ters Tut</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“sen biraz delisin, hatta bana deli divanesin”</p>
+      <a href="https://open.spotify.com/search/Dolu%20Kadehi%20Ters%20Tut%20Biraz%20Delisin" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 47. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">47</span>
+    <span class="song-info">
+      <strong>Nasıl Kalalım Ayrı</strong>
+      <small>Dolu Kadehi Ters Tut</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yollarımız aynı, yönlerimiz aynı, sonumuz aynı. Nası' kalalım ayrı”</p>
+      <a href="https://open.spotify.com/search/Dolu%20Kadehi%20Ters%20Tut%20Nasıl%20Kalalım%20Ayrı" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+      <!-- 48. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">48</span>
+    <span class="song-info">
+      <strong>Anlat Ona</strong>
+      <small>Yedinci Ev</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“açılmadı kalbim, yerin dolmuyor asla”</p>
+      <a href="https://open.spotify.com/search/Yedinci%20Ev%20Anlat%20Ona" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 49. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">49</span>
+    <span class="song-info">
+      <strong>Diğer Yarım</strong>
+      <small>ATE</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“tamamlandım, diğer yarım”</p>
+      <a href="https://open.spotify.com/search/ATE%20Diğer%20Yarım" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+      <!-- 50. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">50</span>
+    <span class="song-info">
+      <strong>Dünya Tek Biz İkimiz</strong>
+      <small>Fatma Turgut</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“hayat hiç korkutmaz yanımda sen varsan, ağlasam duyar beni korur kollarsın”</p>
+      <a href="https://open.spotify.com/search/Fatma%20Turgut%20Dünya%20Tek%20Biz%20İkimiz" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+
+  <!-- 51. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">51</span>
+    <span class="song-info">
+      <strong>Bahsetmem Lazım</strong>
+      <small>Güliz Ayla</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“senden benden bahsetmem lazım kim varsa, umudunu kaybeden”</p>
+      <a href="https://open.spotify.com/search/Güliz%20Ayla%20Bahsetmem%20Lazım" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+      <!-- 52. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">52</span>
+    <span class="song-info">
+      <strong>Ara Beni Lütfen</strong>
+      <small>Kenan Doğulu</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ARA BENİ LÜTFEN”</p>
+      <a href="https://open.spotify.com/search/Kenan%20Doğulu%20Ara%20Beni%20Lütfen" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 53. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">53</span>
+    <span class="song-info">
+      <strong>Sarılırım Birine</strong>
+      <small>Adamlar</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“küsmenin ne faydası var”</p>
+      <a href="https://open.spotify.com/search/Adamlar%20Sarılırım%20Birine" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+      <!-- 54. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">54</span>
+    <span class="song-info">
+      <strong>Yıldızlara Bak</strong>
+      <small>Yaşlı Amca</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“birbirimizden büyük, sevdikçe küçüldük”</p>
+      <a href="https://open.spotify.com/search/Yaşlı%20Amca%20Yıldızlara%20Bak" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 55. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">55</span>
+    <span class="song-info">
+      <strong>Yalakanım Bebeğim</strong>
+      <small>Kalben</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“dinlediğin şarkıları dinlerim, hangi filmi seversen izlerim. Yalakanım bebeğim”</p>
+      <a href="https://open.spotify.com/search/Kalben%20Yalakanım%20Bebeğim" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+      <!-- 56. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">56</span>
+    <span class="song-info">
+      <strong>Ben Hala Rüyada</strong>
+      <small>Oğuzhan Koç</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yüzümü güldüren sendin, geceyi gün ederdin”</p>
+      <a href="https://open.spotify.com/search/Oğuzhan%20Koç%20Ben%20Hala%20Rüyada" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 57. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">57</span>
+    <span class="song-info">
+      <strong>Lovers Rock</strong>
+      <small>TV Girl</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“◊✩𖦹”</p>
+      <a href="https://open.spotify.com/search/TV%20Girl%20Lovers%20Rock" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+<!-- 58. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">58</span>
+    <span class="song-info">
+      <strong>Legendary Lovers</strong>
+      <small>Katy Perry</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“never know karma could be so rewarding and bring me to your life”</p>
+      <a href="https://open.spotify.com/search/Katy%20Perry%20Legendary%20Lovers" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 59. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">59</span>
+    <span class="song-info">
+      <strong>Softcore</strong>
+      <small>The Neighbourhood</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you're like the sun, you wake me up”</p>
+      <a href="https://open.spotify.com/search/The%20Neighbourhood%20Softcore" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+<!-- 60. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">60</span>
+    <span class="song-info">
+      <strong>Flawless</strong>
+      <small>The Neighbourhood</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“the only flaw, you're flawless”</p>
+      <a href="https://open.spotify.com/search/The%20Neighbourhood%20Flawless" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 61. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">61</span>
+    <span class="song-info">
+      <strong>Haykıracak Nefesim Kalmasa Bile</strong>
+      <small>maNga</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ellerim uzanır olduğun yere”</p>
+      <a href="https://open.spotify.com/search/maNga%20Haykıracak%20Nefesim%20Kalmasa%20Bile" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+<!-- 62. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">62</span>
+    <span class="song-info">
+      <strong>Infinity</strong>
+      <small>Jaymes Young</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“'cause you're the reason I believe in fate, you're my paradise”</p>
+      <a href="https://open.spotify.com/search/Jaymes%20Young%20Infinity" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 63. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">63</span>
+    <span class="song-info">
+      <strong>All the Things She Said</strong>
+      <small>t.A.T.u.</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“IR81&SH24”</p>
+      <a href="https://open.spotify.com/search/t.A.T.u.%20All%20the%20Things%20She%20Said" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+<!-- 64. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">64</span>
+    <span class="song-info">
+      <strong>This I Love</strong>
+      <small>Guns N' Roses</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“I've searched the universe and found myself within her eyes”</p>
+      <a href="https://open.spotify.com/search/Guns%20N'%20Roses%20This%20I%20Love" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 65. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">65</span>
+    <span class="song-info">
+      <strong>Still With You</strong>
+      <small>Jung Kook</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“함께 웃고 함께 울고 이 단순한 감정들이 내겐 전부였나봐”</p>
+      <a href="https://open.spotify.com/search/Jung%20Kook%20Still%20With%20You" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+      <!-- 66. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">66</span>
+    <span class="song-info">
+      <strong>Sigara</strong>
+      <small>Müslüm Gürses</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“iyi dostlar biriktirdim, hepsi ailem oldu”</p>
+      <a href="https://open.spotify.com/search/Müslüm%20Gürses%20Sigara" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+    <!-- 67. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">67</span>
+    <span class="song-info">
+      <strong>Make It Right</strong>
+      <small>BTS</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“끝도 보이지 않던 영원의 밤 내게 아침을 선물한 건 너야”</p>
+      <a href="https://open.spotify.com/search/BTS%20Make%20It%20Right" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 68. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">68</span>
+    <span class="song-info">
+      <strong>Ben Tabii Ki</strong>
+      <small>Ümit Sayın</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“seni bu dünyada en çok kim sever, ben tabii ki”</p>
+      <a href="https://open.spotify.com/search/Ümit%20Sayın%20Ben%20Tabii%20Ki" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 69. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">69</span>
+    <span class="song-info">
+      <strong>Yaşanacaksa</strong>
+      <small>Manifest</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yaşanacaksa yaşanacak, ayrılıklar mutsuzluklar. Ölüm yok ya bunun sonunda, tüm acılar bir yere kadar”</p>
+      <a href="https://open.spotify.com/search/Manifest%20Yaşanacaksa" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 70. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">70</span>
+    <span class="song-info">
+      <strong>Bir Efsane</strong>
+      <small>Hakan Peker</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“bir efsaneydi, bir efsaneydi senle beraber olmak”</p>
+      <a href="https://open.spotify.com/search/Hakan%20Peker%20Bir%20Efsane" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 71. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">71</span>
+    <span class="song-info">
+      <strong>Dilerim Ki</strong>
+      <small>Dolu Kadehi Ters Tut</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“kaybolan bir ruh gibi kayıp gidersem de bul beni, mahvolur da bitersem tut elimi”</p>
+      <a href="https://open.spotify.com/search/Dolu%20Kadehi%20Ters%20Tut%20Dilerim%20Ki" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 72. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">72</span>
+    <span class="song-info">
+      <strong>Baş Harfi Ben</strong>
+      <small>Kenan Doğulu</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“gidersen bir gün, biri kırılır çok. Adı lazım değil, baş harfi ben”</p>
+      <a href="https://open.spotify.com/search/Kenan%20Doğulu%20Baş%20Harfi%20Ben" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+  <!-- 73. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">73</span>
+    <span class="song-info">
+      <strong>Lovesong</strong>
+      <small>Adele</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“whenever I am alone with you, you make me feel like I am home again”</p>
+      <a href="https://open.spotify.com/track/2PPN1HFpVotjq7oJIqQbnx?si=aqUv-cSzTFyl2pmj4cHbdw&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+  
+  <!-- 74. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">74</span>
+    <span class="song-info">
+      <strong>O Benim Dünyam</strong>
+      <small>Ajda Pekkan</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“öylesine güçlü, öylesine güzel, öylesine benim olan. O benim dünyam”</p>
+      <a href="https://open.spotify.com/track/0VOOdVBqevVTPggxCHaxxs?si=QLUKJcBfRJe_A4ik1YRozA&utm_source=copy-link" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+    <!-- 75. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">75</span>
+    <span class="song-info">
+      <strong>Tüm Bir Yaşam</strong>
+      <small>Erol Evgin, Atiye</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“önümüzde çok güzel günler var, dedim kendi kendime”</p>
+      <a href="https://open.spotify.com/search/Erol%20Evgin%20Atiye%20T%C3%BCm%20Bir%20Ya%C5%9Fam" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 76. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">76</span>
+    <span class="song-info">
+      <strong>Üç Kalp</strong>
+      <small>Hepsi</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“üç kalp bir arada”</p>
+      <a href="https://open.spotify.com/search/Hepsi%20%C3%9C%C3%A7%20Kalp" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 77. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">77</span>
+    <span class="song-info">
+      <strong>Bulamazsın</strong>
+      <small>Perma</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“tırt to lovers 🫶🏻”</p>
+      <a href="https://open.spotify.com/search/Perma%20Bulamazs%C4%B1n" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 78. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">78</span>
+    <span class="song-info">
+      <strong>Young Dumb & Broke</strong>
+      <small>Khalid</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“young, dumb, broke high school kids”</p>
+      <a href="https://open.spotify.com/search/Khalid%20Young%20Dumb%20Broke" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 79. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">79</span>
+    <span class="song-info">
+      <strong>Olur Ya</strong>
+      <small>Yalın</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“olur ya, tüm saatler durur da sonsuza dek kalırsın yanımda”</p>
+      <a href="https://open.spotify.com/search/Yal%C4%B1n%20Olur%20Ya" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 80. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">80</span>
+    <span class="song-info">
+      <strong>u+me=&lt;3</strong>
+      <small>Olivia Rodrigo</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you plus me equals a heart forever”</p>
+      <a href="https://open.spotify.com/search/Olivia%20Rodrigo%20u%2Bme" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 81. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">81</span>
+    <span class="song-info">
+      <strong>Tralala</strong>
+      <small>Manifest</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“look like an angel, God bless Maşallah 🧿”</p>
+      <a href="https://open.spotify.com/search/Manifest%20Tralala" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+    <!-- 82. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">82</span>
+    <span class="song-info">
+      <strong>Kıskanç</strong>
+      <small>Zeki Arkun</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“bırakamıyoki beni kıskanç”</p>
+      <a href="https://open.spotify.com/search/Zeki%20Arkun%20K%C4%B1skan%C3%A7" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+    <!-- 83. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">83</span>
+    <span class="song-info">
+      <strong>Spring Day</strong>
+      <small>BTS</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you know it all, you're my best friend”</p>
+      <a href="https://open.spotify.com/search/BTS%20Spring%20Day" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 84. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">84</span>
+    <span class="song-info">
+      <strong>Hometown Smile</strong>
+      <small>Bahjat</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you got that hometown smile, you got that look in your eyes”</p>
+      <a href="https://open.spotify.com/search/Bahjat%20Hometown%20Smile" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 85. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">85</span>
+    <span class="song-info">
+      <strong>Best Friend Ever</strong>
+      <small>NCT DREAM</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“喜びと涙嬉しさ悲しさ 分かち合う”</p>
+      <a href="https://open.spotify.com/search/NCT%20DREAM%20Best%20Friend%20Ever" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 86. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">86</span>
+    <span class="song-info">
+      <strong>Dön Bak Dünyaya</strong>
+      <small>Pinhani</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“herkes gitmişse, sakince arkana dön bir bak”</p>
+      <a href="https://open.spotify.com/search/Pinhani%20D%C3%B6n%20Bak%20D%C3%BCnyaya" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 87. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">87</span>
+    <span class="song-info">
+      <strong>Best Friend</strong>
+      <small>Rex Orange County</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“you're still my favorite girl, you better trust me when I tell you there ain't no one else more beautiful”</p>
+      <a href="https://open.spotify.com/search/Rex%20Orange%20County%20Best%20Friend" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 88. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">88</span>
+    <span class="song-info">
+      <strong>Yellow</strong>
+      <small>Coldplay</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“look at the stars, look how they shine for you”</p>
+      <a href="https://open.spotify.com/search/Coldplay%20Yellow" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 89. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">89</span>
+    <span class="song-info">
+      <strong>Friends</strong>
+      <small>BTS</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“언젠가 이 함성 멎을 때 stay (ayy), hey (ayy), you are my soulmate”</p>
+      <a href="https://open.spotify.com/search/BTS%20Friends" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 90. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">90</span>
+    <span class="song-info">
+      <strong>Bros</strong>
+      <small>Wolf Alice</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“oh I'm so lucky, you are my best friend”</p>
+      <a href="https://open.spotify.com/search/Wolf%20Alice%20Bros" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 91. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">91</span>
+    <span class="song-info">
+      <strong>Ki Sen</strong>
+      <small>Yalın</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ki sen benim gözyaşlarımı da gördün”</p>
+      <a href="https://open.spotify.com/search/Yal%C4%B1n%20Ki%20Sen" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 92. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">92</span>
+    <span class="song-info">
+      <strong>Thank U</strong>
+      <small>ATEEZ</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“thank you for being on my side”</p>
+      <a href="https://open.spotify.com/search/ATEEZ%20Thank%20U" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 93. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">93</span>
+    <span class="song-info">
+      <strong>True Blue</strong>
+      <small>boygenius</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“I remember who I am when I am with you”</p>
+      <a href="https://open.spotify.com/search/boygenius%20True%20Blue" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 94. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">94</span>
+    <span class="song-info">
+      <strong>It's Nice to Have a Friend</strong>
+      <small>Taylor Swift</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“it's nice to have a friend”</p>
+      <a href="https://open.spotify.com/search/Taylor%20Swift%20It's%20Nice%20to%20Have%20a%20Friend" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 95. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">95</span>
+    <span class="song-info">
+      <strong>Meleklerin Sözü Var</strong>
+      <small>Yalın</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“son nefesimde elimi sen tutacaksın”</p>
+      <a href="https://open.spotify.com/search/Yal%C4%B1n%20Meleklerin%20S%C3%B6z%C3%BC%20Var" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 96. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">96</span>
+    <span class="song-info">
+      <strong>Grow Up</strong>
+      <small>Stray Kids</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“힘내 좀 참으면 돼 내가 곁에 있을게”</p>
+      <a href="https://open.spotify.com/search/Stray%20Kids%20Grow%20Up" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 97. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">97</span>
+    <span class="song-info">
+      <strong>these are my friends</strong>
+      <small>lovelytheband</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“we are living in your brain”</p>
+      <a href="https://open.spotify.com/search/lovelytheband%20these%20are%20my%20friends" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 98. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">98</span>
+    <span class="song-info">
+      <strong>Ladies Night</strong>
+      <small>Red Velvet</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“우리 서로 함께여서 완벽해진 밤”</p>
+      <a href="https://open.spotify.com/search/Red%20Velvet%20Ladies%20Night" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 99. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">99</span>
+    <span class="song-info">
+      <strong>Brother</strong>
+      <small>Kodaline</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“and if you were drowned at sea, I'd give you my lungs so you could breath”</p>
+      <a href="https://open.spotify.com/search/Kodaline%20Brother" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+    <!-- 100. Şarkı (Özel 100. Şarkı Dönüm Noktası) -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">100</span>
+    <span class="song-info">
+      <strong>everything i wanted</strong>
+      <small>Billie Eilish</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“As long as I'm here, no one can hurt you”</p>
+      <a href="https://open.spotify.com/search/Billie%20Eilish%20everything%20i%20wanted" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 101. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">101</span>
+    <span class="song-info">
+      <strong>Yine Sevebilirim</strong>
+      <small>Tuna Kiremitçi, Yıldız Tilbe</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yanımda olmasanda kanımdasın zaten”</p>
+      <a href="https://open.spotify.com/search/Tuna%20Kiremit%C3%A7i%20Y%C4%B1ld%C4%B1z%20Tilbe%20Yine%20Sevebilirim" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 102. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">102</span>
+    <span class="song-info">
+      <strong>Yok Böyle Bir Şey</strong>
+      <small>Özer Atik</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“yolunu kaybedip dünyaya düşmüş bir meleksin, bana 'beni sevme' diyorsun yok böyle bişey”</p>
+      <a href="https://open.spotify.com/search/%C3%96zer%20Atik%20Yok%20B%C3%B6yle%20Bir%20%C5%9Eey" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 103. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">103</span>
+    <span class="song-info">
+      <strong>Kuzey Yıldızı</strong>
+      <small>Nil Karaibrahimgil</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ben aslında sen olmadan hiç bir yere gitmiyorum”</p>
+      <a href="https://open.spotify.com/search/Nil%20Karaibrahimgil%20Kuzey%20Y%C4%B1ld%C4%B1z%C4%B1" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 104. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">104</span>
+    <span class="song-info">
+      <strong>Sen Benim Şarkılarımsın</strong>
+      <small>Cem Adrian, Hande Mehan</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“geçmiş değil bugün gibi yaşıyorum hala seni, sen hep benim yanımdasın”</p>
+      <a href="https://open.spotify.com/search/Cem%20Adrian%20Hande%20Mehan%20Sen%20Benim%20%C5%9Eark%C4%B1lar%C4%B1ms%C4%B1n" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 105. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">105</span>
+    <span class="song-info">
+      <strong>Hoş Geldin</strong>
+      <small>Gülçin Ergül</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“sensin tam bir yıldız kayarken dilek olan”</p>
+      <a href="https://open.spotify.com/search/G%C3%BCl%C3%A7in%20Erg%C3%BCl%20Ho%C5%9F%20Geldin" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 106. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">106</span>
+    <span class="song-info">
+      <strong>Twin</strong>
+      <small>Jennie</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“we will make up, make things right when we get older, friend”</p>
+      <a href="https://open.spotify.com/search/Jennie%20Twin" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 107. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">107</span>
+    <span class="song-info">
+      <strong>Arsız Gönül</strong>
+      <small>Athena</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“ben mesela, uçarım mesela, yine de senden kaçamıyorum”</p>
+      <a href="https://open.spotify.com/search/Athena%20Ars%C4%B1z%20G%C3%B6n%C3%BCl" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 108. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">108</span>
+    <span class="song-info">
+      <strong>Aşkın Ertesi</strong>
+      <small>Bahadır Tatlıöz</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“seyretti dost düşman bizi, onlara film dizi”</p>
+      <a href="https://open.spotify.com/search/Bahad%C4%B1r%20Tatl%C4%B1%C3%B6z%20A%C5%9Fk%C4%B1n%20Ertesi" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 109. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">109</span>
+    <span class="song-info">
+      <strong>Hani Bana</strong>
+      <small>Hande Yener</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“zaten ben deliydim, nerden çıktı diğeri”</p>
+      <a href="https://open.spotify.com/search/Hande%20Yener%20Hani%20Bana" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 110. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">110</span>
+    <span class="song-info">
+      <strong>Ne Güzel Güldün</strong>
+      <small>Pinhani</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“çok kısa bir zamanda, belki biraz da zorla bence gayet iyi de anlaştık”</p>
+      <a href="https://open.spotify.com/search/Pinhani%20Ne%20G%C3%BCzel%20G%C3%BCld%C3%BCn" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 111. Şarkı -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">111</span>
+    <span class="song-info">
+      <strong>Time of Our Life</strong>
+      <small>DAY6</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“아름다운 청춘의 한 장 함께 써내려 가 자”</p>
+      <a href="https://open.spotify.com/search/DAY6%20Time%20of%20Our%20Life" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <!-- 112. Şarkı (DOĞUM GÜNÜ BÜYÜK FİNALİ) -->
+  <button class="song" onclick="openNote(this)">
+    <span class="number">112</span>
+    <span class="song-info">
+      <strong>Doğum Günü</strong>
+      <small>Melek Mosso</small>
+    </span>
+    <span class="arrow">›</span>
+    <div class="note">
+      <p>“taş batmasın ayağına, acıtmasın asla. Doğum günün kutlu olsun. Hep sen ol yanımda”</p>
+      <a href="https://open.spotify.com/search/Melek%20Mosso%20Do%C4%9Fum%20G%C3%BCn%C3%BC" target="_blank" rel="noopener">♫ Spotify'da aç</a>
+    </div>
+  </button>
+
+  <div class="footer">dokun ve dinle ♡</div>
+</div> 
+
+  <script>
+      let isGiftUnlocked = false;
+// 1. ZAMAN VE KİLİT MEKANİZMASI (Test için geçici olarak 0.01 yapabilirsin)
+  const HOURS_PER_SONG = 24;
+
+  let startTime = localStorage.getItem('playlist_start_time');
+  if (!startTime) {
+    startTime = Date.now();
+    localStorage.setItem('playlist_start_time', startTime);
+  }
+
+  function updateLockStatus() {
+    const songs = document.querySelectorAll('.song');
+    const now = Date.now();
+    const passedHours = (now - startTime) / (1000 * 60 * 60);
+    let nextUnlockHour = null;
+
+    songs.forEach((song, index) => {
+      const requiredHours = index * HOURS_PER_SONG;
+      const arrow = song.querySelector('.arrow');
+      const textSpan = song.querySelector('.song-info');
+
+      if (!song.dataset.originalHtml && textSpan) {
+        song.dataset.originalHtml = textSpan.innerHTML;
+      }
+
+      if (passedHours < requiredHours) {
+        song.classList.add('locked');
+        if (arrow) arrow.textContent = '🔒';
+        if (textSpan) {
+          textSpan.innerHTML = '<strong style="color:#8b9992; font-style:italic">Günün Şarkısı</strong><small style="color:#606f68">Zamanı gelince açılacak ✦</small>';
+        }
+        if (nextUnlockHour === null) {
+          nextUnlockHour = requiredHours - passedHours;
+        }
+      } else {
+        song.classList.remove('locked');
+        if (arrow && arrow.textContent === '🔒') arrow.textContent = '›';
+        if (textSpan && song.dataset.originalHtml) {
+          textSpan.innerHTML = song.dataset.originalHtml;
+        }
+      }
+    });
+
+    const timerEl = document.getElementById('unlock-timer');
+    if (timerEl) {
+      if (nextUnlockHour !== null) {
+        const remainingHours = Math.floor(nextUnlockHour);
+        const remainingMinutes = Math.floor((nextUnlockHour - remainingHours) * 60);
+        timerEl.textContent = `Bir sonraki sürpriz şarkı ${remainingHours} sa ${remainingMinutes} dk sonra açılacak ✨`;
+      } else {
+        timerEl.textContent = 'Tüm sürpriz şarkılar açıldı! 🎶';
+      }
+    }
+  }
+
+  // 2. FOTOĞRAFLI POLAROID KART OLUŞTURUCU
+  const FOTO_KLASOR = "https://raw.githubusercontent.com/ehilal4188/Foto-yeni/main/";
+
+  function buildPolaroidCards() {
+    const songs = document.querySelectorAll('.song');
+    songs.forEach((song, index) => {
+      const songNum = index + 1;
+      const noteEl = song.querySelector('.note');
+      
+      const noteText = noteEl ? (noteEl.querySelector('p')?.innerHTML || '') : '';
+      const spotifyLink = noteEl ? (noteEl.querySelector('a')?.getAttribute('href') || '#') : '#';
+
+      if (!song.querySelector('.polaroid-step')) {
+        const card = document.createElement('div');
+        card.className = 'polaroid-step';
+        card.innerHTML = `
+          <div class="polaroid-img-box">
+            <img src="${FOTO_KLASOR}foto${songNum}.jpg" alt="Fotoğraf ${songNum}" onerror="this.src='https://placehold.co/220x200/eef3f0/8faec9?text=Anı+♡'">
+          </div>
+          <div class="polaroid-caption">${noteText}</div>
+          <a class="polaroid-spotify" href="${spotifyLink}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+            ♫ Spotify'da aç
+          </a>
+        `;
+        song.appendChild(card);
+      }
+    });
+  }
+
+  // 3. TIKLAMA FONKSİYONLARI (Hem openNote hem handleSongClick destekler)
+  function handleSongClick(el) {
+    if (el.classList.contains('locked')) return;
+
+    document.querySelectorAll('.song').forEach(x => {
+      if (x !== el) {
+        x.classList.remove('show-card');
+      }
+    });
+
+    el.classList.toggle('show-card');
+  }
+
+  function openNote(el) {
+    handleSongClick(el);
+  }
+
+  // 4. DOĞUM GÜNÜ GERİ SAYIM SAYACI (3 Mart 2027)
+  const BIRTHDAY_DATE = new Date(2027, 2, 3, 0, 0, 0).getTime();
+
+  function updateBirthdayCountdown() {
+    const now = Date.now();
+    const diff = BIRTHDAY_DATE - now;
+
+    const daysEl = document.getElementById('bday-days');
+    const hoursEl = document.getElementById('bday-hours');
+    const minsEl = document.getElementById('bday-mins');
+    const secsEl = document.getElementById('bday-secs');
+
+    if (diff <= 0) {
+      if (daysEl) daysEl.textContent = '00';
+      if (hoursEl) hoursEl.textContent = '00';
+      if (minsEl) minsEl.textContent = '00';
+      if (secsEl) secsEl.textContent = '00';
+      const titleEl = document.querySelector('.bday-title');
+      if (titleEl) titleEl.textContent = 'İYİ Kİ DOĞDUN! 🎉🎂';
+            // Sayfa ilk açıldığında konfetileri patlat:
+      if (!window.hasConfettiFired) {
+        window.hasConfettiFired = true;
+        launchBirthdayConfetti();
+      }
+
+            // Doğum gününde açılacaklar:
+      const finalBox = document.getElementById('bday-final-box');
+      if (finalBox) finalBox.style.display = 'block';
+
+      const camBtn = document.getElementById('cam-float-btn');
+      if (camBtn) camBtn.style.display = 'flex';
+
+      // Hediye kutusunun kilidini aç:
+      isGiftUnlocked = true;
+      const giftBox = document.getElementById('gift-box');
+      const giftTitle = document.getElementById('gift-title');
+      const giftSub = document.getElementById('gift-subtitle');
+      if (giftBox) {
+        giftBox.classList.remove('locked');
+        giftBox.classList.add('unlocked');
+      }
+      if (giftTitle) giftTitle.textContent = "Sana Özel Bir Video Var! ✨🎁";
+      if (giftSub) giftSub.textContent = "Dokun ve hediyeni aç ♡";
+      return;
+    }
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (daysEl) daysEl.textContent = String(d).padStart(2, '0');
+    if (hoursEl) hoursEl.textContent = String(h).padStart(2, '0');
+    if (minsEl) minsEl.textContent = String(m).padStart(2, '0');
+    if (secsEl) secsEl.textContent = String(s).padStart(2, '0');
+  }
+
+  // Sayfa yüklendiğinde hepsini başlat
+  buildPolaroidCards();
+  updateLockStatus();
+  setInterval(updateLockStatus, 60000);
+
+  updateBirthdayCountdown();
+  setInterval(updateBirthdayCountdown, 1000);
+      // --- DİJİTAL KAMERA VE TÜM LİSTE GALERİ MANTIĞI ---
+  let currentPhotoIndex = 1;
+  const TOTAL_PHOTOS = 112;
+
+  function updateGalleryImage() {
+    const photoEl = document.getElementById('gallery-photo');
+    const counterEl = document.getElementById('gallery-counter');
+    if (photoEl) {
+      photoEl.src = `${FOTO_KLASOR}foto${currentPhotoIndex}.jpg`;
+    }
+    if (counterEl) {
+      counterEl.textContent = `${String(currentPhotoIndex).padStart(2, '0')} / ${TOTAL_PHOTOS}`;
+    }
+  }
+
+  function openGallery() {
+    currentPhotoIndex = 1;
+    updateGalleryImage();
+    const modal = document.getElementById('cam-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeGallery() {
+    const modal = document.getElementById('cam-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function nextPhoto() {
+    if (currentPhotoIndex < TOTAL_PHOTOS) {
+      currentPhotoIndex++;
+    } else {
+      currentPhotoIndex = 1; // Başa dön
+    }
+    updateGalleryImage();
+  }
+
+  function prevPhoto() {
+    if (currentPhotoIndex > 1) {
+      currentPhotoIndex--;
+    } else {
+      currentPhotoIndex = TOTAL_PHOTOS; // Sona git
+    }
+    updateGalleryImage();
+  }
+    // --- HEDİYE KUTUSU VE VİDEO YÖNETİMİ ---
+
+    function handleGiftClick() {
+    if (!isGiftUnlocked) {
+      alert("Bu hediye kutusu doğum gününde açılacak! Birazcık daha sabret... ✨🎁");
+      return;
+    }
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('birthday-video');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+    if (video) {
+      video.play().catch(function(err) {
+        console.log("Otomatik başlatma engellendi:", err);
+      });
+    }
+  }
+
+  function closeVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('birthday-video');
+    if (modal) modal.style.display = 'none';
+    if (video) {
+      video.pause();
+      video.currentTime = 0; // Kapatınca videoyu başa sar
+    }
+  }
+      // --- DOĞUM GÜNÜ KONFETİ VE YILDIZ EFEKTİ ---
+  function launchBirthdayConfetti() {
+    const colors = ['#b4d39b', '#8faec9', '#ffd166', '#ff9aa2', '#ffffff', '#e2ede5'];
+    const stars = ['★', '✦', '⋆', '•'];
+    const totalCount = 70; // Ekrana dökülecek toplam parça sayısı
+
+    for (let i = 0; i < totalCount; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'confetti-particle';
+
+        // %40 ihtimalle sarı parlayan yıldız, %60 ihtimalle renkli konfeti karesi
+        const isStar = Math.random() < 0.4;
+
+        if (isStar) {
+          el.textContent = stars[Math.floor(Math.random() * stars.length)];
+          el.style.color = '#f9ca24'; // Canlı altın sarısı
+          el.style.fontSize = (Math.random() * 16 + 12) + 'px';
+          el.style.textShadow = '0 0 8px rgba(249, 202, 36, 0.8)';
+        } else {
+          el.style.width = (Math.random() * 8 + 6) + 'px';
+          el.style.height = (Math.random() * 12 + 8) + 'px';
+          el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          el.style.borderRadius = Math.random() > 0.5 ? '2px' : '50%';
+        }
+
+        // Rastgele yatay pozisyon ve düşüş süresi
+        el.style.left = Math.random() * 100 + 'vw';
+        const duration = Math.random() * 2.5 + 2.5; // 2.5 ile 5 saniye arası
+        el.style.animationDuration = duration + 's';
+
+        document.body.appendChild(el);
+
+        // Ekrandan çıkınca temizle
+        setTimeout(() => {
+          el.remove();
+        }, duration * 1000);
+      }, i * 45); // Sırayla, doğal bir yağmur gibi düşsünler
+    }
+  }
+
+
+</script>
+
+
+</body>
+</html>
